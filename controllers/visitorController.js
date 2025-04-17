@@ -10,6 +10,8 @@ const visitorController = {
           req.socket.remoteAddress ||
           (req.connection.socket ? req.connection.socket.remoteAddress : null);
 
+      console.log(ip);
+
       // Optional: format IPv6 localhost to IPv4
       const formattedIp = ip === "::1" ? "127.0.0.1" : ip;
 
