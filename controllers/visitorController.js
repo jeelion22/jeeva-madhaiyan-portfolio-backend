@@ -5,13 +5,23 @@ const visitorController = {
     try {
       // Get visitor IP
       const ip =
-        req.ip || // for proxies/load balancers
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        (req.connection.socket ? req.connection.socket.remoteAddress : null);
+        req.headers["x-forwarded-for"] || // for proxies/load balancers
+        req.connection?.remoteAddress ||
+        req.socket?.remoteAddress ||
+        req.connection?.socket?.remoteAddress ||
+        null;
 
-      // Optional: format IPv6 localhost to IPv4
-      const formattedIp = ip === "::1" ? "127.0.0.1" : ip;
+      if (!ip) {
+        return res
+          .status(400)
+          .json({ error: "Unable to determine IP address" });
+      }
+
+      // Format IP (especially for IPv6 localhost)
+      const formattedIp =
+        ip.split(",")[0].trim() === "::1"
+          ? "127.0.0.1"
+          : ip.split(",")[0].trim();
 
       // Check if visitor already exists
       let visitor = await Visitor.findOne({ visitorIp: formattedIp });
@@ -19,14 +29,17 @@ const visitorController = {
       if (visitor) {
         // Update count and visit date
         visitor.visitorCount += 1;
-        visitor.visitedOn.push(Date.now());
+        visitor.visitedOn.push(new Date()); // Date instead of timestamp
         await visitor.save();
+
         return res.status(200).json({ message: "Visitor updated", visitor });
       } else {
         // Create new visitor
         const newVisitor = await Visitor.create({
           visitorIp: formattedIp,
+          visitedOn: [new Date()], // Init with array of first visit
         });
+
         return res
           .status(201)
           .json({ message: "New visitor added", visitor: newVisitor });
