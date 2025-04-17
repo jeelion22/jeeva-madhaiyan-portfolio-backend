@@ -5,7 +5,7 @@ const visitorController = {
     try {
       // Get visitor IP
       const ip =
-        req.headers["x-forwarded-for"]?.split(",")[0] || // for proxies/load balancers
+        req.ip || // for proxies/load balancers
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
         (req.connection.socket ? req.connection.socket.remoteAddress : null);
