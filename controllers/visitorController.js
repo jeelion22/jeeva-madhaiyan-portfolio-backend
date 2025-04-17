@@ -4,11 +4,11 @@ const visitorController = {
   visitorMonitor: async (req, res) => {
     try {
       // Get visitor IP
-      const ip =
-        req.headers["x-forwarded-for"] || // for proxies/load balancers
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        (req.connection.socket ? req.connection.socket.remoteAddress : null);
+      const ip = xForwardedFor
+        ? xForwardedFor.split(",")[0].trim()
+        : req.connection.remoteAddress ||
+          req.socket.remoteAddress ||
+          (req.connection.socket ? req.connection.socket.remoteAddress : null);
 
       // Optional: format IPv6 localhost to IPv4
       const formattedIp = ip === "::1" ? "127.0.0.1" : ip;
