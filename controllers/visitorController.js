@@ -1,5 +1,6 @@
 const Visitor = require("../models/visitor");
-const moment = require("moment");
+const moment = require("moment-timezone");
+
 const { sendEmail } = require("../utils/email");
 const { generateVisitorEmailHTML } = require("../utils/visitorEmailTemplate");
 
@@ -26,9 +27,12 @@ const visitorController = {
           ? "127.0.0.1"
           : ip.split(",")[0].trim();
 
-      const now = new Date();
+      // const now = new Date();
 
-      const formattedDate = moment(now).format("LLL");
+      const formattedDate = moment
+        .utc()
+        .tz("Asia/Kolkata")
+        .format("YYYY-MM-DD hh:mm:ss A");
 
       // Check if visitor already exists
       let visitor = await Visitor.findOne({ visitorIp: formattedIp });
