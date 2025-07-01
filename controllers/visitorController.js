@@ -1,4 +1,7 @@
 const Visitor = require("../models/visitor");
+const moment = require("moment");
+const { sendEmail } = require("../utils/email");
+const { generateVisitorEmailHTML } = require("../utils/visitorEmailTemplate");
 
 const visitorController = {
   visitorMonitor: async (req, res) => {
@@ -23,6 +26,10 @@ const visitorController = {
           ? "127.0.0.1"
           : ip.split(",")[0].trim();
 
+      const now = new Date();
+
+      const formattedDate = moment(now).format("MMMM Do YYYY, h:mm:ss a");
+
       // Check if visitor already exists
       let visitor = await Visitor.findOne({ visitorIp: formattedIp });
 
@@ -32,6 +39,14 @@ const visitorController = {
         visitor.visitedOn.push(new Date()); // Date instead of timestamp
         await visitor.save();
 
+        const message = generateVisitorEmailHTML(
+          formattedIp,
+          formattedDate,
+          false
+        );
+
+        await sendEmail(message);
+
         return res.status(200).json({ message: "Visitor updated", visitor });
       } else {
         // Create new visitor
@@ -39,6 +54,14 @@ const visitorController = {
           visitorIp: formattedIp,
           visitedOn: [new Date()], // Init with array of first visit
         });
+
+        const message = generateVisitorEmailHTML(
+          formattedIp,
+          formattedDate,
+          true
+        );
+
+        await sendEmail(message);
 
         return res
           .status(201)
