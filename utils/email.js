@@ -27,7 +27,7 @@ const sendEmail = async (message) => {
       html: message,
     });
 
-    console.log("Alert sent: ", info.messageId);
+    console.log("Alert sent");
   } catch (error) {
     console.log(error.message);
   }
