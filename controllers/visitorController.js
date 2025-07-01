@@ -28,7 +28,7 @@ const visitorController = {
 
       const now = new Date();
 
-      const formattedDate = moment(now).format("YYYY-MM-DD HH:mm:ss");
+      const formattedDate = moment(now).format("LLL");
 
       // Check if visitor already exists
       let visitor = await Visitor.findOne({ visitorIp: formattedIp });
